@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -17,7 +18,7 @@ public class UserTest {
         User user = new User("bel@mail.ru", "Егос");
         user.setName("Егор");
         user.setBirthday(birthday);
-        assertTrue(user.validate());
+        assertTrue(UserController.validate(user));
     }
 
     @Test
@@ -26,7 +27,7 @@ public class UserTest {
         User user = new User("", "Егос");
         user.setName("Егор");
         user.setBirthday(birthday);
-        assertFalse(user.validate());
+        assertFalse(UserController.validate(user));
     }
 
     @Test
@@ -35,7 +36,7 @@ public class UserTest {
         User user = new User("gmail@gmail", "Егос ");
         user.setName("Егор");
         user.setBirthday(birthday);
-        assertFalse(user.validate());
+        assertFalse(UserController.validate(user));
     }
 
     @Test
@@ -44,7 +45,7 @@ public class UserTest {
         User user = new User("gmail@gmail", "Егос");
         user.setName("Егор");
         user.setBirthday(birthday);
-        assertFalse(user.validate());
+        assertFalse(UserController.validate(user));
     }
 
     @Test
@@ -53,7 +54,8 @@ public class UserTest {
         User user = new User("gmail@gmail", "Егос");
         user.setName("");
         user.setBirthday(birthday);
-        user.validate();
+        UserController.validate(user);
         assertEquals(user.getLogin(), user.getName());
     }
+
 }

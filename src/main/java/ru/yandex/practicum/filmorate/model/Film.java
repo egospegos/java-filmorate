@@ -1,48 +1,34 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
 
-@Data
 @Slf4j
+@RequiredArgsConstructor
+@Getter
+@Setter
 public class Film {
-    private int id;
+    private Long id;
     @NonNull
+    @NotEmpty(message = "Name should not be empty")
     private String name;
     @NonNull
+    @Size(max = 200, message = "Description should not be over 200 symbols")
     private String description;
     @NonNull
     private LocalDate releaseDate;
     @NonNull
+    @Min(value = 1, message = "duration should be positive")
     private int duration;
-    private static final int MAX_DESCRIPTION_LENGTH = 200;
-    private static final LocalDate FIRST_MOVIE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
 
-    public boolean validate() {
-        if (name.isEmpty()) {
-            log.info("Название фильма не может быть пустым");
-            return false;
-        }
 
-        if (description.length() > MAX_DESCRIPTION_LENGTH) {
-            log.info("Максимальная длина описания — 200 символов");
-            return false;
-        }
 
-        if (releaseDate.isBefore(FIRST_MOVIE_DATE)) {
-            log.info("Дата релиза — не раньше 28 декабря 1895 года");
-            return false;
-        }
-
-        if (duration <= 0) {
-            log.info("Продолжительность фильма должна быть положительной");
-            return false;
-        }
-        return true;
-    }
 }
