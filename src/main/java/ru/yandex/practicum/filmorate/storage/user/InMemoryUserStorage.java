@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
-@Component
+@Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Long, User> users = new HashMap();
@@ -26,7 +26,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User get(long userId){
+    public User get(long userId) {
         return users.get(userId);
     }
 
@@ -36,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User create(@Valid @RequestBody User user) {
+    public User create(User user) {
         user.setId(userId++);
         users.put(user.getId(), user);
         log.info("Добавлен пользователь с id = {}", user.getId());

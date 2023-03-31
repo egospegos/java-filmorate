@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -19,10 +21,12 @@ public class FilmService {
     private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final LocalDate FIRST_MOVIE_DATE = LocalDate.of(1895, Month.DECEMBER, 28);
     private final FilmStorage filmStorage;
+    private final LikeStorage likeStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, LikeStorage likeStorage) {
         this.filmStorage = filmStorage;
+        this.likeStorage = likeStorage;
     }
 
     public List<Film> getAll() {
@@ -75,17 +79,21 @@ public class FilmService {
     }
 
     public void addLike(long id, long userId) {
-        filmStorage.get(id).addLike(userId);
+        likeStorage.addLike(id, userId);
     }
 
     public void removeLike(long id, long userId) {
         validateId(id);
         validateId(userId);
-        filmStorage.get(id).removeLike(userId);
+        likeStorage.removeLike(id, userId);
     }
 
     public List<Film> getPopular(int count) {
-        return filmStorage.getAll().stream()
+        List<Film> allFilms = filmStorage.getAll();
+        for (Film i : allFilms) {
+            i.setRate(likeStorage.countFilmLikes(i.getId()));
+        }
+        return allFilms.stream()
                 .sorted(FILM_COMPARATOR)
                 .limit(count)
                 .collect(Collectors.toList());

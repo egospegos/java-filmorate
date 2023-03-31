@@ -66,8 +66,4 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable(("id")) long id, @PathVariable("otherId") long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
-
-
-
-
 }

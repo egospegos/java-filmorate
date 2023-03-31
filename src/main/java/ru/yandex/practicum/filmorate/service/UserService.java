@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
@@ -15,12 +17,13 @@ import java.util.List;
 
 @Service
 public class UserService {
-
+    private final FriendshipStorage friendshipStorage;
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, FriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
+        this.friendshipStorage = friendshipStorage;
     }
 
     public List<User> getAll() {
@@ -71,22 +74,16 @@ public class UserService {
     public void addFriend(long userId, long friendId) {
         validateId(userId);
         validateId(friendId);
-        final User user = userStorage.get(userId);
-        final User friend = userStorage.get(friendId);
-        user.getFriendIds().add(friendId);
-        friend.getFriendIds().add(userId);
+        friendshipStorage.addFriend(userId, friendId);
     }
 
     public void removeFriend(long userId, long friendId) {
-        final User user = userStorage.get(userId);
-        final User friend = userStorage.get(friendId);
-        user.getFriendIds().remove(friendId);
-        friend.getFriendIds().remove(userId);
+        friendshipStorage.removeFriend(userId, friendId);
     }
 
     public List<User> getFriends(long id) {
         ArrayList<User> friendsArrayList = new ArrayList<>();
-        for (Long i : userStorage.get(id).getFriendIds()) {
+        for (Long i : friendshipStorage.getFriendIds(id)) {
             friendsArrayList.add(userStorage.get(i));
         }
         return friendsArrayList;
@@ -100,8 +97,8 @@ public class UserService {
         if (userStorage.get(id).getFriendIds() == null || userStorage.get(otherId).getFriendIds() == null) {
             return commonFriendsArrayList;
         }
-        for (Long i : userStorage.get(id).getFriendIds()) {
-            for (Long j : userStorage.get(otherId).getFriendIds()) {
+        for (Long i : friendshipStorage.getFriendIds(id)) {
+            for (Long j : friendshipStorage.getFriendIds(otherId)) {
                 if (i == j) {
                     commonFriendsArrayList.add(userStorage.get(i));
                 }
