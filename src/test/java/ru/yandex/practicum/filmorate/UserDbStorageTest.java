@@ -56,7 +56,7 @@ public class UserDbStorageTest {
     @Test
     public void testGetAllUser() {
         List<User> userList = userStorage.getAll();
-        assertThat(userList.size()).isEqualTo(3);
+        assertThat(userList.size()).isEqualTo(4);
     }
 
     @Test
@@ -77,9 +77,9 @@ public class UserDbStorageTest {
 
     @Test
     public void testDeleteUser() {
-        userStorage.delete(3L);
+        userStorage.delete(4L);
         List<User> userList = userStorage.getAll();
-        assertThat(userList.size()).isEqualTo(2);
+        assertThat(userList.size()).isEqualTo(3);
     }
 
 }
