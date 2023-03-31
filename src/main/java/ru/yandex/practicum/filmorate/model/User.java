@@ -1,14 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Past;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;

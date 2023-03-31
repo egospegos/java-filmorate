@@ -2,17 +2,12 @@ package ru.yandex.practicum.filmorate.storage.filmGenre;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.MPA.MPAStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 @Component
 public class FilmGenreDbStorage implements FilmGenreStorage {

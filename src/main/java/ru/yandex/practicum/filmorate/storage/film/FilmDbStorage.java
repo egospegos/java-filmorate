@@ -8,18 +8,14 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.MPA.MPAStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {

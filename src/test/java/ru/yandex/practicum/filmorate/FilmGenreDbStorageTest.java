@@ -13,7 +13,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.friendship.FriendshipDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.util.ArrayList;
