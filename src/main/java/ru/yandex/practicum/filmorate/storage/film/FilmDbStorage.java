@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.MPA.MPAStorage;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 
 import java.sql.Date;
@@ -20,12 +21,10 @@ import java.util.List;
 @Component("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final MPAStorage mpaStorage;
     private final FilmGenreStorage filmGenreStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, MPAStorage mpaStorage, FilmGenreStorage filmGenreStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmGenreStorage filmGenreStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mpaStorage = mpaStorage;
         this.filmGenreStorage = filmGenreStorage;
     }
 
@@ -47,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(keyHolder.getKey().longValue());
 
         //делаем записи с информацией о жанрах фильма
-        filmGenreStorage.updateGenresOfFilm(film.getId(), film.getGenres());
+        updateGenresOfFilm(film.getId(), film.getGenres());
 
         return film;
     }
@@ -66,20 +65,21 @@ public class FilmDbStorage implements FilmStorage {
                 film.getId());
 
         //делаем записи с информацией о жанрах фильма
-        filmGenreStorage.updateGenresOfFilm(film.getId(), film.getGenres());
+        updateGenresOfFilm(film.getId(), film.getGenres());
         return get(film.getId());
     }
 
     @Override
     public Film get(long id) {
-        String sqlQuery = "select id, name, description, release_date, duration, id_mpa " +
-                "from film where id = ?";
+        String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration, MPA.ID, MPA.name  " +
+                "from film f JOIN MPA ON f.ID_MPA = MPA.ID where f.id = ?";
+        Film film = new Film();
         try {
-            Film film = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
+            film = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
         } catch (EmptyResultDataAccessException e) {
             throw new DataNotFoundException("Пользователь с таким id не найден");
         }
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
+        return film;
     }
 
     @Override
@@ -90,15 +90,39 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
-        String sqlQuery = "select id, name, description, release_date, duration, id_mpa from film";
+        //String sqlQuery = "select id, name, description, release_date, duration, id_mpa from film";
+        String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration, MPA.ID, MPA.name  " +
+                "from film f JOIN MPA ON f.ID_MPA = MPA.ID";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         List<Genre> genreList = filmGenreStorage.findGenresByFilmId(rs.getLong("id"));
 
-        return new Film(rs.getLong("id"), mpaStorage.findMpaById(rs.getLong("id_mpa")),
-                rs.getString("name"), rs.getString("description"),
-                rs.getDate("release_date").toLocalDate(), rs.getInt("duration"), genreList);
+        return new Film(rs.getLong("FILM.id"), new MPA(rs.getLong("MPA.id"), rs.getString("MPA.name")),
+                rs.getString("FILM.name"), rs.getString("FILM.description"),
+                rs.getDate("FILM.release_date").toLocalDate(), rs.getInt("FILM.duration"), genreList);
+    }
+
+    private void updateGenresOfFilm(Long filmId, List<Genre> genres) {
+        //удалить старые жанры у фильма
+        filmGenreStorage.delete(filmId);
+
+        this.jdbcTemplate.batchUpdate(
+                "INSERT INTO film_genre(id_film, id_genre) SELECT ?, ? " +
+                        "WHERE NOT EXISTS (SELECT ID_FILM, ID_GENRE FROM film_genre WHERE ID_FILM = ? AND ID_GENRE = ?)",
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        Genre genre = genres.get(i);
+                        ps.setLong(1, filmId);
+                        ps.setLong(2, genre.getId());
+                        ps.setLong(3, filmId);
+                        ps.setLong(4, genre.getId());
+                    }
+
+                    public int getBatchSize() {
+                        return genres.size();
+                    }
+                });
     }
 }

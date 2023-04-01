@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage.filmGenre;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,28 +12,12 @@ import java.util.List;
 public class FilmGenreDbStorage implements FilmGenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
 
-    public FilmGenreDbStorage(JdbcTemplate jdbcTemplate, GenreStorage genreStorage) {
+
+    public FilmGenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.genreStorage = genreStorage;
     }
 
-    @Override
-    public void updateGenresOfFilm(Long filmId, List<Genre> genres) {
-        //удалить старые жанры у фильма
-        delete(filmId);
-
-        if (genres.size() != 0) {
-            for (Genre genre : genres) {
-                String sqlQuery = "insert into film_genre(id_film, id_genre) " +
-                        "values (?, ?)";
-                jdbcTemplate.update(sqlQuery,
-                        filmId,
-                        genre.getId());
-            }
-        }
-    }
 
     @Override
     public void delete(long filmId) {
@@ -44,11 +27,11 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
 
     @Override
     public List<Genre> findGenresByFilmId(Long filmId) {
-        String sqlQuery = "select DISTINCT id_genre from film_genre where id_film = ? ORDER BY ID_GENRE";
+        String sqlQuery = "select DISTINCT g.ID, g.NAME  from film_genre f JOIN GENRE g ON f.ID_GENRE = g.ID where id_film = ? ORDER BY g.ID";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilmGenre, filmId);
     }
 
     private Genre mapRowToFilmGenre(ResultSet rs, int rowNum) throws SQLException {
-        return genreStorage.get(rs.getLong("id_genre"));
+        return new Genre(rs.getLong("GENRE.id"), rs.getString("GENRE.name"));
     }
 }

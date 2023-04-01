@@ -88,14 +88,11 @@ public class FilmService {
     }
 
     public List<Film> getPopular(int count) {
-        List<Film> allFilms = filmStorage.getAll();
-        for (Film i : allFilms) {
-            i.setRate(likeStorage.countFilmLikes(i.getId()));
-        }
-        return allFilms.stream()
-                .sorted(FILM_COMPARATOR)
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> films = likeStorage.getPopular(count);
+        //если лайков нет, то вывести все фильмы
+        if (films.size() == 0) films = filmStorage.getAll();
+        return films;
+
     }
 
     public static final Comparator<Film> FILM_COMPARATOR = Comparator.comparingLong(Film::getRate).reversed();

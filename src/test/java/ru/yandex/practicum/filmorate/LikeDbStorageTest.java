@@ -11,6 +11,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +24,7 @@ public class LikeDbStorageTest {
     private EmbeddedDatabase embeddedDatabase;
     private JdbcTemplate jdbcTemplate;
     private LikeDbStorage likeStorage;
+    private FilmGenreStorage filmGenreStorage;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +34,8 @@ public class LikeDbStorageTest {
                 .setType(EmbeddedDatabaseType.H2)
                 .build();
         jdbcTemplate = new JdbcTemplate(embeddedDatabase);
-        likeStorage = new LikeDbStorage(jdbcTemplate);
+        filmGenreStorage = new FilmGenreDbStorage(jdbcTemplate);
+        likeStorage = new LikeDbStorage(jdbcTemplate, filmGenreStorage);
     }
 
     @AfterEach

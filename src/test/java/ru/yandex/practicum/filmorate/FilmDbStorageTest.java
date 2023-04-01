@@ -49,8 +49,8 @@ public class FilmDbStorageTest {
         jdbcTemplate = new JdbcTemplate(embeddedDatabase);
         mpaStorage = new MPADbStorage(jdbcTemplate);
         genreStorage = new GenreDbStorage(jdbcTemplate);
-        filmGenreStorage = new FilmGenreDbStorage(jdbcTemplate, genreStorage);
-        filmStorage = new FilmDbStorage(jdbcTemplate, mpaStorage, filmGenreStorage);
+        filmGenreStorage = new FilmGenreDbStorage(jdbcTemplate);
+        filmStorage = new FilmDbStorage(jdbcTemplate, filmGenreStorage);
         testFilm = new Film("mail@yandex.ru",
                 "doloreUpdate2", LocalDate.of(2000, 5, 10), 130);
     }

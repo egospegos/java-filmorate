@@ -5,7 +5,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.List;
 
 public interface FilmGenreStorage {
-    void updateGenresOfFilm(Long filmId, List<Genre> genres);
 
     void delete(long id);
 
